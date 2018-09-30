@@ -33,7 +33,6 @@ export default {
 			this.loadAnimes();
 		}
 		this.loadLastReleases();
-
 	},
 	computed: {
 		...mapGetters(['filtered_animes', 'favorite_animes', 'currently_watching']),
@@ -51,7 +50,6 @@ export default {
 		selected_genres_name() {
 			return this.store_genres.filter(genre => genre.selected).map(genre => genre.name);
 		},
-
 	},
 	data: () => ({
 		getting_anime_info: null,
@@ -62,7 +60,7 @@ export default {
 	}),
 	methods: {
 		...mapActions(['getAnimes', 'getAnimeDetails', 'getLastReleases']),
-		...mapMutations(['SET_CURRENT_ANIME', 'ADD_PREFERRED_GENRE', 'REMOVE_PREFERRED_GENRE']),
+		...mapMutations(['SET_CURRENT_ANIME', 'ADD_PREFERRED_GENRE', 'REMOVE_PREFERRED_GENRE', 'SET_NOTIFICATION']),
 		loadAnimes() {
 			this.getting_animes = true;
 			this.getAnimes().then(res => {

@@ -2,7 +2,7 @@
   "name": "monimo",
   "author": "Monimo",
   "description": "First class experience for watching animes.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scripts": {
     "serve": "vue-cli-service serve ",
     "build": "vue-cli-service build",
@@ -63,11 +63,11 @@
   ],
   "main": "dist_electron/bundled/background.js",
   "build": {
-    "appId": "com.github.shpetimselaci.monimo",
+    "appId": "com.github.altinselimi.monimo",
     "publish": [
       {
         "provider": "github",
-        "owner": "shpetimselaci",
+        "owner": "altinselimi",
         "repo": "monimo"
       }
     ],
