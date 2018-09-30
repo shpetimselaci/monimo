@@ -26,7 +26,9 @@ export default new Vuex.Store({
     watching_animes: {},
     searched_animes: [],
     search_query: null,
-    window_mode: 'normal'
+    window_mode: 'normal',
+    preferred_anime_type: 0,
+    preferred_quality: 720,
   },
   mutations: {
     SET_ANIMES(state, payload) {
@@ -88,7 +90,13 @@ export default new Vuex.Store({
     },
     SET_CURRENT_VIDEO_LINKS(state, payload) {
       state.current_anime_video_links = payload;
-    }
+    },
+    SET_PREFERRED_TYPE(state, payload) {
+      state.preferred_anime_type = parseInt(payload);
+    },
+    SET_PREFERRED_QUALITY(state, payload) {
+      state.preferred_quality = parseInt(payload);
+    },
   },
   actions: {
     getAnimes({ state, commit }, params) {
@@ -178,6 +186,15 @@ export default new Vuex.Store({
       return state.favorite_animes.map(anime => {
         return { ...anime.info, ['genres']: anime.genres, ['poster']: `https://cdn.masterani.me/poster/1/${anime.poster}` };
       });
+    },
+    video_links: (state) => {
+      if (!state.current_anime_video_links) return;
+      let subs = state.current_anime_video_links['subs'];
+      let dubs = state.current_anime_video_links['dubs'];
+      if (state.preferred_anime_type === 1) {
+        return dubs || subs;
+      }
+      return subs;
     },
     searched: (state) => {
       return state.searched_animes;

@@ -7,7 +7,7 @@
             <div class="logo-wrap">
                 <a tabindex="0" @click="$router.push('/home')" class="logo">
                     <span style="font-size:80%; align-self: flex-end;">🦉</span>
-                    <span>MONIMO 3</span>
+                    <span>MONIMO</span>
                     <!-- <span class="sublogo">your anime best fren</span> -->
                 </a>
             </div>
@@ -159,7 +159,7 @@ export default {
 }
 header {
   //-webkit-user-select: none;
-  -webkit-app-region: drag;
+  // -webkit-app-region: drag;
   backdrop-filter: blur(21px);
   background-color: rgba(black, 0.75);
   padding: 20px;
