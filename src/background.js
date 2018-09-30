@@ -1,12 +1,15 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, screen } from 'electron'
+import { app, protocol, BrowserWindow, screen, ipcMain } from 'electron'
+import log from 'electron-log'
 import { autoUpdater } from 'electron-updater'
 import * as path from 'path'
 import { format as formatUrl } from 'url'
 import { createProtocol, installVueDevtools } from 'vue-cli-plugin-electron-builder/lib'
 const isDevelopment = process.env.NODE_ENV !== 'production'
-
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = 'info';
+log.info('App starting...');
 if (isDevelopment) {
   // Don't load any native (external) modules until the following line is run:
   require('module').globalPaths.push(process.env.NODE_MODULES_PATH)
@@ -31,7 +34,7 @@ function createMainWindow() {
     width,
     height,
   });
-  //window.webContents.openDevTools();
+  window.webContents.openDevTools();
   if (isDevelopment) {
     // Load the url of the dev server if in development mode
     window.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
@@ -47,7 +50,7 @@ function createMainWindow() {
       })
     )
   }
-  
+
 
   window.on('closed', () => {
     mainWindow = null
@@ -59,10 +62,13 @@ function createMainWindow() {
       window.focus()
     })
   })
-
   return window
 }
 
+function sendStatusToWindow(channel, text) {
+  log.info(text);
+  mainWindow.webContents.send(channel, text);
+}
 // quit application when all windows are closed
 app.on('window-all-closed', () => {
   // on macOS it is common for applications to stay open until the user explicitly quits
@@ -84,30 +90,30 @@ app.on('ready', async() => {
     // Install Vue Devtools
     await installVueDevtools()
   }
-  autoUpdater.checkForUpdatesAndNotify();
   mainWindow = createMainWindow()
+  autoUpdater.checkForUpdatesAndNotify();
 })
-autoUpdater.on('checking-for-update', () => {
-  sendStatusToWindow('Checking for update...');
-});
+// autoUpdater.on('checking-for-update', () => {
+//   sendStatusToWindow('checking-for-update', 'Checking for update...');
+// });
 autoUpdater.on('update-available', info => {
-  sendStatusToWindow('Update available.');
+  sendStatusToWindow('update-available', true);
 });
-autoUpdater.on('update-not-available', info => {
-  sendStatusToWindow('Update not available.');
-});
+// autoUpdater.on('update-not-available', info => {
+//   sendStatusToWindow('message', 'Update not available.');
+// });
 autoUpdater.on('error', err => {
-  sendStatusToWindow(`Error in auto-updater: ${err.toString()}`);
+  sendStatusToWindow('error');
 });
 autoUpdater.on('download-progress', progressObj => {
-  sendStatusToWindow(
-    `Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent}% (${progressObj.transferred} + '/' + ${progressObj.total} + )`
-  );
+  sendStatusToWindow('download-progress', progressObj);
+  // );
+  //  `Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent}% (${progressObj.transferred} + '/' + ${progressObj.total} + )`
 });
 autoUpdater.on('update-downloaded', info => {
-  sendStatusToWindow('Update downloaded; will install now');
+  sendStatusToWindow('update-downloaded', true);
 });
-
-autoUpdater.on('update-downloaded', info => {
+ipcMain.on('installUpdate', (e, a) => {
+  // console.log("it is trying to update!!");
   autoUpdater.quitAndInstall();
 });

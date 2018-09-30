@@ -14,7 +14,6 @@
 </template>
 <script>
 import { mapState, mapMutations, mapActions, mapGetters } from 'vuex';
-
 export default {
 	name: 'Home',
 	components: {

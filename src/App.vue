@@ -16,11 +16,9 @@
 import { router } from './routes';
 import store from './store';
 import { mapMutations, mapState } from 'vuex';
-import { Maximize2Icon,Minimize2Icon,XCircleIcon } from 'vue-feather-icons'
-
+import { Maximize2Icon,Minimize2Icon,XCircleIcon } from 'vue-feather-icons';
 import VuexRouterSync from 'vuex-router-sync';
 VuexRouterSync.sync(store, router);
-
 export default {
   name: 'monimo',
   components:{
