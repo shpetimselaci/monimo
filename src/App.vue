@@ -9,17 +9,17 @@
         <XCircleIcon/>
       </button>
     </div>
-    <alert :visibility.sync="notificationVisibility" :persistent="notification.persist">
+    <alert :visibility.sync="notificationVisibility" :persistent="notification.persist" type="alert">
       {{notification.message}}
       <div slot="buttons" class="buttons">
-        <button>Now</button>
+        <button style="width: 80px;" @click="notificationVisibility = true">Now</button>
         <button @click="notificationVisibility = false">Later</button>
       </div>
     </alert>
-    <alert :visibility.sync="showHelpUs" :persistent="false" :duration="20">
-      Want to help keep this app alive ?
+    <alert :visibility.sync="showHelpUs" :persistent="false" :duration="10">
+      Want to help keep this Monimo alive ?
       <div slot="buttons" class="buttons">
-        <button style="width: 80px;">Yeah 😎</button>
+        <button style="width: 80px;" @click="openHelpLink()">Sure 🙂</button>
         <button @click="showHelpUs = false">Meh 😤</button>
       </div>
     </alert>
@@ -32,6 +32,7 @@ import store from './store';
 import { mapMutations, mapState } from 'vuex';
 import { Maximize2Icon, Minimize2Icon, XCircleIcon } from 'vue-feather-icons'
 import Alert from '@/components/alert';
+import { shell, ipcRenderer } from 'electron';
 import VuexRouterSync from 'vuex-router-sync';
 VuexRouterSync.sync(store, router);
 export default {
@@ -44,34 +45,50 @@ export default {
   },
   data:() => ({
     showHelpUs: true,
+    update_available: false,
+    update_finished: false
   }),
-  mounted() {
-    if (this.newVersionAvailable) {
-      this.SET_NOTIFICATION({ message: 'New version exists. Want to update ?', type: 'info', persist: true });
-    }
+  mounted(){
+      this.SET_NOTIFICATION({message:null, type: null});
   },
+  created(){
+    ipcRenderer.on('download-progress', (event, progressObj) =>{
+      this.SET_DOWNLOADED_PERCENTAGE(progressObj.percent);
+    });
+    },
   computed: {
     ...mapState({
       window_mode: state => state.window_mode,
       notification: state => state.notification,
+      downloaded_percentage: state => state.downloaded_percentage
     }),
     notificationVisibility: {
       get() {
+        if(this.newVersionAvailable)this.SET_NOTIFICATION({ message: 'New version exists. Want to update ?', type: 'info', persist: true })
         return !!this.notification.message;
       },
       set(val) {
-        if (!val) this.SET_NOTIFICATION({ message: null, type: null });
+        if (!val) this.SET_NOTIFICATION({ message: null, type: null })
+        else{this.updateApp()}
       },
     },
-    newVersionAvailable() {
-      return true; //@Shpetim must use this variable to display a popup
-    },
+    newVersionAvailable(){
+      return this.downloaded_percentage === 100
+    }
   },
   methods: {
-    ...mapMutations(['UPDATE_SEARCH_QUERY', 'SET_WINDOW_MODE', 'SET_NOTIFICATION']),
+    ...mapMutations(['UPDATE_SEARCH_QUERY', 'SET_WINDOW_MODE', 'SET_NOTIFICATION', 'SET_DOWNLOADED_PERCENTAGE']),
     getBack() {
       this.$router.go(-1);
-    }
+    },
+    updateApp(){
+      this.SET_DOWNLOADED_PERCENTAGE(0)
+      this.SET_NOTIFICATION({message:null, type: null})
+      ipcRenderer.send('installUpdate')
+    },
+    openHelpLink() {
+      shell.openExternal('http://monimoapp.com/#help-us')
+    },
   },
   router,
   store,
